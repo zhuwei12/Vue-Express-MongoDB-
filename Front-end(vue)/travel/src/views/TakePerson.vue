@@ -34,8 +34,10 @@
                 </el-row>
             </div>
         </router-link></div>
-
-        
+        <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50" class="loading">
+            <img src="../../static/loading-spinning-bubbles.svg" v-show="loading">
+        </div>
+        <div style="height:100px"></div>
         <!--根据出行时间是否过期决定显示背景为disabled  这个功能暂时不用，后期有可能加，现在的想法是正常显示，但是进入详情页无法添加评论
         <div class="article-contain disabled"><router-link to="/detail?id=1">
             <el-row class="article-title">
@@ -123,6 +125,11 @@
 .grey-color{
     color: grey;
 }
+.loading{
+    margin: 0 auto;
+    width: 100px;
+    text-align: center;
+}
 </style>
 
 <script>
@@ -138,7 +145,11 @@ export default {
           errFlag:false,
           sex:'',
           destination:'',
-          goTime:''
+          goTime:'',
+          busy:true,
+          loading:false,
+          page:1,
+          pageSize:3
       }
   },
   mounted(){
@@ -150,22 +161,39 @@ export default {
       SideBar
   },
   methods:{
-      getArticles(){
-          //后面要实现排序功能的话需要传参数到后台
+      getArticles(flag){
+          this.loading = true;//显示loading图标
           axios.post("/articles/articleList",{
               sex:this.sex,
               destination:this.destination,
-              goTime:this.goTime
+              goTime:this.goTime,
+              page:this.page,
+              pageSize:this.pageSize
           }).then((response)=>{
               let res = response.data;
+              this.loading = false;//隐藏loading图标
               if(res.status=="0"){
-                  this.articleList = res.msg;
-              }else{
+                  if(flag){//如果不是第一次请求数据，加到数组中
+                      this.articleList = this.articleList.concat(res.msg);
+
+                      if(res.msg.length==0){//请求数据为空了
+                          this.busy = true;//禁用滚动方法
+                      }else{
+                          this.busy = false;//启用滚动方法
+                      }
+
+                  }else{
+                      this.articleList = res.msg;//如果是第一次请求数据，赋值到数组中
+                      this.busy = false;//启用滚动方法
+                  }
+                  
+              }else{ //请求出错，返回空
+                  this.articleList=[];
                   this.errFlag=true;
                   console.log("获取服务器出现问题，请稍后重试")
               }
               
-          }).then(()=>{
+          }).then(()=>{//只显示文章前200个字符
               for(var i=0;i<this.articleList.length;i++){
                  this.articleList[i].articleDescription = this.articleList[i].articleDescription.substr(0,200)+'……'
                  this.articleList[i].articleGoTime = this.articleList[i].articleGoTime.split('T')[0]
@@ -175,21 +203,32 @@ export default {
       },
       getSex(sex){
           this.sex=sex;
+          this.page=1;
           this.getArticles();
       },
       getDes(destination){
           this.destination=destination;
+          this.page=1;
           this.getArticles();
       },
       getTime(goTime){
           this.goTime=goTime;
+          this.page=1;
           this.getArticles();
       },
       getAll(){
           this.sex='';  
           this.destination='';
           this.goTime='';
+          this.page=1;
           this.getArticles();
+      },
+      loadMore(){
+          this.busy = true;//禁用滚动方法
+          setTimeout(() => {
+                  this.page++;
+                  this.getArticles(true);
+                }, 500);//.5s之后向后台要数据（如果不加settimeout的话请求会成千上万，这样保证滚动一次只一个请求）
       }
   }
 }

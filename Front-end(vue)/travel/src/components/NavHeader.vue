@@ -408,7 +408,7 @@
             this.loginFlag=false;
             this.getTip();
           }
-          if(res.status=="1"){
+          else if(res.status=="1"){
             this.loginWrongWord=true;
           }else{
             this.errFlag=true

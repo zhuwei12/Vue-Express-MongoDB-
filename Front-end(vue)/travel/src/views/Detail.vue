@@ -53,7 +53,7 @@
                 <br>
                 <el-row type="flex" justify="center" v-for="(img,key) in articleDetails.articleImg" :key="key">
                   <el-col :span="16" >
-                      <img :src="'http://120.79.159.66:3000/'+img" class="user-img">               
+                      <img v-lazy="'http://120.79.159.66:3000/'+img" class="user-img">               
                   </el-col>
                 </el-row>
               </el-row>

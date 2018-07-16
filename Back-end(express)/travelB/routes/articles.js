@@ -121,6 +121,9 @@ router.post("/articleImg",function(req,res,next){
 });
 //获取文章列表
 router.post("/articleList",function(req,res,next){
+  var page = req.body.page;
+  var pageSize = req.body.pageSize;
+  var skip = (page-1)*pageSize;
   var destination = req.body.destination;
   var goTime = req.body.goTime;
   var searchTime;//查询条件变量
@@ -132,7 +135,11 @@ router.post("/articleList",function(req,res,next){
   if(goTime=="1-3月内")searchTime={$gte:date.setMonth(date.getMonth()+1),$lte:date.setMonth(date.getMonth()+2)}
   if(goTime=="3月以上")searchTime={$gte:date.setMonth(date.getMonth()+3)}
 
-  var param={'articleDestination':destination,'articleGoTime':searchTime,'articleOwnerSex':sex};
+  var param={
+    'articleDestination':destination,
+    'articleGoTime':searchTime,
+    'articleOwnerSex':sex
+  };
 
   if(destination=='')delete param.articleDestination
   if(goTime=='')delete param.articleGoTime
@@ -140,7 +147,7 @@ router.post("/articleList",function(req,res,next){
 
   
 
-  Article.find(param).sort({'_id':-1}).exec((err,doc)=>{
+  Article.find(param).skip(skip).limit(pageSize).sort({'_id':-1}).exec((err,doc)=>{
     if(err){
       res.json({
           status:"1",
