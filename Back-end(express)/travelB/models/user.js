@@ -17,6 +17,7 @@ var userSchema = new mongoose.Schema({
         /*自己文章的评论*/
         "comment":[
             {
+                "time":Date,
                 "from":String,
                 "articleId":String,
                 "commentContent":String
@@ -39,7 +40,6 @@ var userSchema = new mongoose.Schema({
         "with":String,//nickName
         "myMessageContent":[  //我发送的多条私信
                 {
-                    
                     "name":String,
                     "sendTime":Date,//根据时间排列渲染
                     "content":String
@@ -55,8 +55,9 @@ var userSchema = new mongoose.Schema({
       }
   ],
   /*文章里给我的回复*/
-  "toMeReply":[//少了时间项
+  "toMeReply":[
       {
+        "time":Date,
         "from":String,
         "replyContent":String,
         "articleId":String

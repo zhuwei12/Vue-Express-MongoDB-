@@ -30,7 +30,7 @@
               <!--主体头像部分-->
               <el-row class="content-title">
                 <el-col :sm={span:1,offset:4} :xs={span:4,offset:1}>
-                    <!--<router-link to="/self?id=10000">--> <img class="head-img" :src="'http://120.79.159.66:3000/'+articleDetails.articleOwnerHeadImg"> <!--</router-link>-->
+                    <!--<router-link to="/self?id=10000">--> <img class="head-img" :src="'http://collegetravel.cn/'+articleDetails.articleOwnerHeadImg"> <!--</router-link>-->
                 </el-col>
                 <el-col :span="12" :xs="18">
                     <el-row>
@@ -53,7 +53,7 @@
                 <br>
                 <el-row type="flex" justify="center" v-for="(img,key) in articleDetails.articleImg" :key="key">
                   <el-col :span="16" >
-                      <img v-lazy="'http://120.79.159.66:3000/'+img" class="user-img">               
+                      <img v-lazy="'http://collegetravel.cn/'+img" class="user-img">               
                   </el-col>
                 </el-row>
               </el-row>
@@ -85,7 +85,7 @@
             <div v-for="(comment,key) in articleComments" :key="key">
                 <el-row class="user-remark-head">
                     <el-col :sm={span:1,offset:4} :xs={span:4,offset:1}>
-                        <img :src="'http://120.79.159.66:3000/'+comment.commentOwnerHeadImg" class="head-img">
+                        <img :src="'http://collegetravel.cn/'+comment.commentOwnerHeadImg" class="head-img">
                     </el-col>
                     <el-col :span="15" :xs="18" class="user-comment-head">
                         <br>
@@ -262,6 +262,7 @@ export default {
                 if(date.getSeconds()>=0 && date.getSeconds()<=9)sec='0'+date.getSeconds();
                 else{sec=date.getSeconds()}
                 axios.post('/articles/comment',{
+                    time:new Date().setHours(new Date().getHours()+8),
                     date:date.getFullYear()+'.'+(date.getMonth()+1)+'.'+date.getDate()+' '+date.getHours()+':'+min+':'+sec,
                     remark:this.remark,
                     articleId:this.$route.query.id,
@@ -308,13 +309,16 @@ export default {
           })
       },
       getComments(){
-          axios.post('/articles/getComments',{
-              articleId:this.$route.query.id
-          }).then((response)=>{
-              var res=response.data;
-              if(res.status=='0')
-              this.articleComments=res.msg.reverse()
-          })
+          if(this.articleDetails!=null){
+              axios.post('/articles/getComments',{
+                articleId:this.$route.query.id
+            }).then((response)=>{
+                var res=response.data;
+                if(res.status=='0')
+                this.articleComments=res.msg.reverse()
+            })
+          }
+          
       },
 
   }

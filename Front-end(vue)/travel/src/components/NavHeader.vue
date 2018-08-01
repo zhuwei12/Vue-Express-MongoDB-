@@ -18,9 +18,7 @@
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item v-if="showNoMessageFlag">现在没有任何消息哦</el-dropdown-item>
-              <div v-for="(judge,key) in judge" :key="key"><router-link :to="{path:'/detail',query:{id:judge.articleId}}"><el-dropdown-item>{{judge.from}} 评论了你的文章 </el-dropdown-item> </router-link></div>
-              <div v-for="(reply,index) in reply" :key="index"><router-link :to="{path:'/detail',query:{id:reply.articleId}}"><el-dropdown-item>{{reply.from}} 回复了你  </el-dropdown-item></router-link></div>
-              <div v-for="message in message" @click="sendSignal"><router-link :to="{path:'/messageDetail',query:{name:message}}" ><el-dropdown-item>{{message}} 私信了你  </el-dropdown-item></router-link></div>
+              <div v-for="(tip,key) in tips" :key="key"><router-link :to="tip.verb=='私信了你'?{path:'/messageDetail',query:{name:tip.from}}:{path:'/detail',query:{id:tip.articleId}}"><el-dropdown-item>{{tip.from}} {{tip.verb}}</el-dropdown-item> </router-link></div>
             </el-dropdown-menu>
           </el-dropdown>
         </el-col>
@@ -296,9 +294,7 @@
         ifLogin:false,
         signal:false,
         //消息显示变量
-        reply:[],
-        judge:[],
-        message:[],
+        tips:[],
 
         rule:{
           registerUserName:[
@@ -325,17 +321,12 @@
     computed:{
           ...mapState(['globalNickName','globalHeadImg'])
     },
-    /*初步的想法，监测这几个数组的变化，一旦有变就调用方法显示未读消息，但是用户不可能一直呆在这个网页中不走，所以最好的办法是把这些数据都保存在后台，每次与后台数据相比较。
+    /*初步的想法，监测这个数组的变化，一旦有变就调用方法显示未读消息，但是用户不可能一直呆在这个网页中不走，所以最好的办法是把这些数据都保存在后台，每次与后台数据相比较。
     watch:{
-      judge:()=>{
-
-      },
-      message:()=>{
-
-      },
-      reply:()=>{
+      tips:()=>{
 
       }
+      
     },*/
     mounted(){
           this.getTip();
@@ -404,7 +395,7 @@
           let res = response.data;
           if(res.status=="0"){
             this.$store.commit("updateUserNickName",res.result.nickName);
-            this.$store.commit("updateUserHeadImg","http://120.79.159.66:3000/"+res.result.userHeadImg);
+            this.$store.commit("updateUserHeadImg","http://collegetravel.cn/"+res.result.userHeadImg);
             this.loginFlag=false;
             this.getTip();
           }
@@ -438,7 +429,7 @@
                           this.$emit('ifLogin',this.ifLogin)
                         //将返回值赋给全局变量
                           this.$store.commit("updateUserNickName",res.result.userNickName);
-                          this.$store.commit("updateUserHeadImg","http://120.79.159.66:3000/"+res.result.userHeadImg);
+                          this.$store.commit("updateUserHeadImg","http://collegetravel.cn/"+res.result.userHeadImg);
                         }else if(res.status=='1'){
                           this.ifLogin=false
                           this.$emit('ifLogin',this.ifLogin)
@@ -465,17 +456,13 @@
         axios.get('/users/getTips').then((response)=>{
           let res = response.data;
           if(res.status=='0'){
-            this.judge=res.publishReply.reverse();
-            this.reply=res.articleReply.reverse();
-            this.message=res.messageReply.reverse()
+            this.tips = res.concatArray
           } 
         }).then(()=>{
-          if(this.judge.length==0&&this.message.length==0&&this.reply.length==0){
+          if(this.tips.length==0){
             this.showNoMessageFlag=true
           }
         })
-        
-          
       },
       sendSignal(){
         this.signal=!this.signal;

@@ -114,6 +114,7 @@ export default {
                 let res = response.data;
                 if(res.status=='0'){
                     this.$message({
+                        showClose: true,
                         type: 'success',
                         message: '发送成功！'
                     });
@@ -121,6 +122,7 @@ export default {
                     this.getMessage();
                 }else{
                     this.$message({
+                        showClose: true,
                         type: 'error',
                         message: '啊哦，发送失败了'
                     });

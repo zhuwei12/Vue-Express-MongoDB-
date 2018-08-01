@@ -435,7 +435,7 @@ router.get("/getMessageDialog", (req,res,next) => {
    
   })
 })
-//获取评论人、回复者、私信者，写到头的消息提醒处
+//获取评论人、回复者、私信者，按时间顺序写到头的消息提醒处
 router.get("/getTips", (req,res,next) => {
   var userId = req.session.user.userId
   User.findOne({'userId':userId},(err,doc)=>{
@@ -445,13 +445,13 @@ router.get("/getTips", (req,res,next) => {
         msg:'err'
       })
     }else{
-      var publishReply=[];//[{from:xxx,articleId:xxx}]
-      var messageReply=[];//[[from:xxx]]
-      var articleReply=[];//[{from:xxx,articleId:xxx}]
+      var publishReply=[];//[{date:xxx,from:xxx,articleId:xxx,verb:'评论了你的文章'}]
+      var messageReply=[];//[{date:xxx,from:xxx,verb:'私信了你'}]
+      var articleReply=[];//[{date:xxx,from:xxx,articleId:xxx,verb:'回复了你'}]
       for(var i = 0;i<doc.publishArticle.length;i++){
         for(var j=0;j<doc.publishArticle[i].comment.length;j++){
           if(doc.publishArticle[i].comment.length!=0){
-            publishReply[j]={from:doc.publishArticle[i].comment[j].from,articleId:doc.publishArticle[i].comment[j].articleId}
+            publishReply[j]={date:doc.publishArticle[i].comment[j].time,from:doc.publishArticle[i].comment[j].from,articleId:doc.publishArticle[i].comment[j].articleId,verb:'评论了你的文章'}
           }
         }
         
@@ -459,17 +459,28 @@ router.get("/getTips", (req,res,next) => {
       for(var i=0;i<doc.message.length;i++){
         if(doc.message[i].hisMessageContent.length!=0){
           for(var j=0;j<doc.message[i].hisMessageContent.length;j++)
-            messageReply[j]=doc.message[i].with
+            messageReply[j]={date:doc.message[i].hisMessageContent[j].sendTime,from:doc.message[i].with,verb:'私信了你'}
         }
       }
       for(var i=0;i<doc.toMeReply.length;i++){
-        articleReply[i]={from:doc.toMeReply[i].from,articleId:doc.toMeReply[i].articleId}
+        articleReply[i]={date:doc.toMeReply[i].time,from:doc.toMeReply[i].from,articleId:doc.toMeReply[i].articleId,verb:'回复了你'}
+      }
+      //将这几个数组合并起来并按时间进行排序
+      var concatArray = publishReply.concat(messageReply).concat(articleReply)
+      var a;//临时交换变量
+      for(var i = 0;i<concatArray.length;i++){
+        for(var j=i+1;j<concatArray.length;j++){
+          if(concatArray[i].date<concatArray[j].date){
+            a=concatArray[i];
+            concatArray[i]=concatArray[j];
+            concatArray[j]=a;
+          }
+        }
+        
       }
       res.json({
         status:'0',
-        publishReply,
-        messageReply,
-        articleReply
+        concatArray
       })
     }
   })

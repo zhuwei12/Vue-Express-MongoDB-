@@ -200,6 +200,7 @@ router.post("/comment",function(req,res,next){
       User.update({'userId':req.body.articleOwnerId,'publishArticle.articleId':articleId},{
         $push:{
           'publishArticle.$.comment':{
+            time:req.body.time,
             from:userNickName,    
             articleId,
             commentContent
@@ -222,6 +223,7 @@ router.post("/comment",function(req,res,next){
       User.update({'userNickName':commentToWhom},{
         $push:{
           toMeReply:{
+            time:req.body.time,
             from:userNickName,
             replyContent: commentContent,
             articleId

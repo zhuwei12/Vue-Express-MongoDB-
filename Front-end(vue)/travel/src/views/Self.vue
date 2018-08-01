@@ -142,12 +142,14 @@ export default {
                     let res = response.data;
                     if(res.status=='0'){
                         this.$message({
+                            showClose: true,
                             type: 'success',
                             message: '删除成功!'
                             });
                         this.getPublishArticles();
                     }else{
                         this.$message({
+                            showClose: true,
                             type: 'error',
                             message: '啊哦，哪里出错了!'
                         });
@@ -160,12 +162,14 @@ export default {
                     let res = response.data;
                     if(res.status=='0'){
                         this.$message({
+                            showClose: true,
                             type: 'success',
                             message: '删除成功!'
                             });
                         this.getCollectArticles();
                     }else{
                         this.$message({
+                            showClose: true,
                             type: 'error',
                             message: '啊哦，哪里出错了!'
                         });
